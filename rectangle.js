@@ -10,7 +10,21 @@
     }, {},{}
 ];
 */  
+/*
+{
+    id: 0,
+    x: 100,
+    y: 100,
+    width: 200,
+    height: 150,
+    radius: 10,
+    setSize: function(100, 100) 
+    setPosition: function(10, 10); 
+    setCornerRadius: function(5); 
+    toJSON: function();
+}
 
+*/
 window.currentState = {};
 
 function app_init(initialValues){
@@ -122,40 +136,45 @@ function initRectangleControls(){
     var start = {};
     var rectID, dx, dy;
 
-    for(i=0; i<rectangles.length; i++){
-        rectangles[i].addEventListener('mousedown', function(ev){
-            mousedown = true;
-            start.x = ev.x;
-            start.y = ev.y;         
-            this.style.zIndex = 100;
-        })
-        rectangles[i].addEventListener('mouseup', function(ev){
-            mousedown = false;
-            start.x = null;
-            start.y = null; 
-            this.style.zIndex = 0;   
-        })
-        rectangles[i].addEventListener('mouseleave',function(ev){
-            mousedown = false;
-        })
-        document.addEventListener('mousemove', function(ev){
-            if(mousedown == false){
-                //do nothing
-            }else{
-                rectID = event.target.getAttribute('rect-data');
-                dx = ev.x - start.x;
-                dy = ev.y - start.y;
-                rect_translate(rectID, dx,dy);
-                redraw(rectID);  
-                start.x = ev.x;
-                start.y = ev.y;   
-                
-            }
-            
-        })
+    function startDrag(event){
+        mousedown = true;
+        start.x = event.x;
+        start.y = event.y;         
+        this.style.zIndex = 100;
+    }
+    function endDrag(event){
+        mousedown = false;
+        start.x = null;
+        start.y = null; 
+        this.style.zIndex = 0;  
+    }
 
-        
-        
+    function dragMove(event){
+        if(mousedown == false){
+            //do nothing
+        }else{
+            rectID = event.target.getAttribute('rect-data');
+            dx = event.x - start.x;
+            dy = event.y - start.y;
+            rect_translate(rectID, dx,dy);
+            redraw(rectID);  
+            start.x = event.x;
+            start.y = event.y;   
+            
+        }
+    }
+
+    for(i=0; i<rectangles.length; i++){
+        rectangles[i].addEventListener('mousedown', startDrag);
+        rectangles[i].addEventListener('touchstart', startDrag);
+
+        rectangles[i].addEventListener('mouseup', endDrag);
+        rectangles[i].addEventListener('touchend', endDrag);
+
+        rectangles[i].addEventListener('mouseleave',endDrag);
+
+        document.addEventListener('touchmove', dragMove)
+        document.addEventListener('mousemove', dragMove)
     }
 
 }
@@ -168,4 +187,3 @@ rect.setPosition(10, 10);
 rect.setCornerRadius(5); 
 expect(rect.toJSON()).eql({ id: 1, width: 100, height: 100, x: 10, y: 10, radius: 5 });
 */
-

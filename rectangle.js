@@ -127,7 +127,7 @@ function initRectangleControls(){
             mousedown = true;
             start.x = ev.x;
             start.y = ev.y;         
-            this.style.zIndex = 100;   
+            this.style.zIndex = 100;
         })
         rectangles[i].addEventListener('mouseup', function(ev){
             mousedown = false;
@@ -135,12 +135,14 @@ function initRectangleControls(){
             start.y = null; 
             this.style.zIndex = 0;   
         })
-
-        rectangles[i].addEventListener('mousemove', function(ev){
+        rectangles[i].addEventListener('mouseleave',function(ev){
+            mousedown = false;
+        })
+        document.addEventListener('mousemove', function(ev){
             if(mousedown == false){
                 //do nothing
             }else{
-                rectID = this.getAttribute('rect-data');
+                rectID = event.target.getAttribute('rect-data');
                 dx = ev.x - start.x;
                 dy = ev.y - start.y;
                 rect_translate(rectID, dx,dy);

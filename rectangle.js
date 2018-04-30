@@ -1,18 +1,4 @@
 //window.rectanglesData == [{},{},{}]
-
-//init : 
-/*
-var application = document.querySelector('#app');
-
-var rectangle = (id, x, y, width, height, radius){
-
-}
-*/
-
-function app(initialValues){
-
-    var app = document.querySelector('#app');
-    this.currentState = {};
 /*window.rectanglesData = [
     {
         id: 0,
@@ -24,18 +10,28 @@ function app(initialValues){
     }, {},{}
 ];
 */  
+
+window.currentState = {};
+
+function app_init(initialValues){
+
+    var app = document.querySelector('#app');
+
     for(i=0; i<initialValues.length; i++){
         var curr = initialValues[i];
-        this.currentState[i] = new rectangle(curr.id,
-                                        curr.x,
-                                        curr.y,
-                                        curr.width,
-                                        curr.height,
-                                        curr.radius);
+        this.currentState[i] = new rectangle(   curr.id,
+                                                curr.x,
+                                                curr.y,
+                                                curr.width,
+                                                curr.height,
+                                                curr.radius);
     }
 
+    window.currentState = initialValues;
+
+
     this.getRectById = function(Identifier){ //return the object of the rectangle
-        return this.currentState[Identifier];
+        return window.currentState[Identifier];
     }
 
     this.updateControls = function(){
@@ -102,19 +98,42 @@ function rectangle(id, x = 0, y = 0, width = 100, height = 100, radius = 0){
 } //end of rectangle
 
 
+function rect_translate(id, dx, dy){
+    
+    window.currentState[id].x = window.currentState[id].x + dx;
+    window.currentState[id].y = window.currentState[id].y + dy;
+    redraw(id);
+}
+
+
+function redraw(identifier){
+    var rect = document.querySelector(`[rect-data="${identifier}"]`); //get the edited element
+    rect.style.width = window.currentState[identifier].width + "px";
+    rect.style.height = window.currentState[identifier].height + "px";
+    rect.style.left = window.currentState[identifier].x + "px";
+    rect.style.top = window.currentState[identifier].y + "px";
+    return true;
+}
+
 function initRectangleControls(){
     var rectangles = document.querySelectorAll('.rectangle');
     var rectangle;
     var mousedown = false;
-    var current = {};
-    var rectID;
+    var start = {};
+    var rectID, dx, dy;
 
     for(i=0; i<rectangles.length; i++){
         rectangles[i].addEventListener('mousedown', function(ev){
-            mousedown = true;            
+            mousedown = true;
+            start.x = ev.x;
+            start.y = ev.y;         
+            this.style.zIndex = 100;   
         })
         rectangles[i].addEventListener('mouseup', function(ev){
             mousedown = false;
+            start.x = null;
+            start.y = null; 
+            this.style.zIndex = 0;   
         })
 
         rectangles[i].addEventListener('mousemove', function(ev){
@@ -122,8 +141,13 @@ function initRectangleControls(){
                 //do nothing
             }else{
                 rectID = this.getAttribute('rect-data');
-                rectangle = app.getRectById(rectID);
-                rectangle.setPosition(10,10);
+                dx = ev.x - start.x;
+                dy = ev.y - start.y;
+                rect_translate(rectID, dx,dy);
+                redraw(rectID);  
+                start.x = ev.x;
+                start.y = ev.y;   
+                
             }
             
         })

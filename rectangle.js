@@ -33,7 +33,7 @@ function app_init(initialValues){
 
     for(i=0; i<initialValues.length; i++){
         var curr = initialValues[i];
-        this.currentState[i] = new rectangle(   curr.id,
+        window.currentState[i] = new rectangle( curr.id,
                                                 curr.x,
                                                 curr.y,
                                                 curr.width,
@@ -41,19 +41,10 @@ function app_init(initialValues){
                                                 curr.radius);
     }
 
-    window.currentState = initialValues;
-
 
     this.getRectById = function(Identifier){ //return the object of the rectangle
         return window.currentState[Identifier];
     }
-
-    this.updateControls = function(){
-        initRectangleControls();
-    }
-
-    this.updateControls(); //if we allow adding / removing of rectangles
-
 
 } //end of app
 
@@ -64,33 +55,7 @@ function rectangle(id, x = 0, y = 0, width = 100, height = 100, radius = 0){
     this.width = width;
     this.height = height;
     this.radius = radius;
-
-
-    this.toJSON = function(){
-        return { id: this.id, width: this.width, height: this.height, x: this.x, y: this.y, radius: this.radius };
-    }
-
-    this.setSize = function(width, height){
-        this.width = width;
-        this.height = height;
-        this.draw();
-    }
-
-    this.getPosition = function(){
-        return {x: this.x, y: this.y}; 
-    }
-
-    this.setPosition = function(x, y){
-        this.x = x;
-        this.y = y;
-        this.draw();
-    }
-
-    this.setCornerRadius = function(radius){
-        this.x = x;
-        this.y = y;
-        this.draw();
-    }
+    this.element;
 
     this.draw = function(){
         var app = document.querySelector('#app');
@@ -103,81 +68,93 @@ function rectangle(id, x = 0, y = 0, width = 100, height = 100, radius = 0){
         rect.style.height = `${this.height}px`;
         rect.style.left = `${this.x}px`;
         rect.style.top = `${this.y}px`;
+        rect.style.borderRadius = `${this.radius}px`;
         app.appendChild(rect);
+        return rect;
+    }
+    this.element = this.draw();
+
+    this.redraw = function(){
+        var rect = document.querySelector(`[rect-data="${this.id}"]`); //get the edited element
+        rect.style.width = window.currentState[this.id].width + "px";
+        rect.style.height = window.currentState[this.id].height + "px";
+        rect.style.left = window.currentState[this.id].x + "px";
+        rect.style.top = window.currentState[this.id].y + "px";
+        rect.style.borderRadius = window.currentState[this.id].radius + "px";
+        return true;
     }
 
     
-    this.draw();
+    this.toJSON = function(){
+        return { id: this.id, width: this.width, height: this.height, x: this.x, y: this.y, radius: this.radius };
+    }
 
-} //end of rectangle
+    this.setSize = function(width, height){
+        this.width = width;
+        this.height = height;
+        this.redraw();
+    }
 
+    this.getPosition = function(){
+        return {x: window.currentState[this.id].x, y: window.currentState[this.id].y};
+    }
 
-function rect_translate(id, dx, dy){
-    
-    window.currentState[id].x = window.currentState[id].x + dx;
-    window.currentState[id].y = window.currentState[id].y + dy;
-    redraw(id);
-}
+    this.setPosition = function(x, y){
+        window.currentState[this.id].x = x;
+        window.currentState[this.id].y = y;
+        this.redraw();
+    }
 
+    this.setCornerRadius = function(radius){
+        this.x = x;
+        this.y = y;
+        this.redraw();
+    }
 
-function redraw(identifier){
-    var rect = document.querySelector(`[rect-data="${identifier}"]`); //get the edited element
-    rect.style.width = window.currentState[identifier].width + "px";
-    rect.style.height = window.currentState[identifier].height + "px";
-    rect.style.left = window.currentState[identifier].x + "px";
-    rect.style.top = window.currentState[identifier].y + "px";
-    return true;
-}
-
-function initRectangleControls(){
-    var rectangles = document.querySelectorAll('.rectangle');
-    var rectangle;
     var mousedown = false;
     var start = {};
-    var rectID, dx, dy;
 
     function startDrag(event){
         mousedown = true;
         start.x = event.x;
         start.y = event.y;         
-        this.style.zIndex = 100;
+        event.target.style.zIndex = 100;
     }
     function endDrag(event){
         mousedown = false;
         start.x = null;
         start.y = null; 
-        this.style.zIndex = 0;  
+        event.target.style.zIndex = 0;  
     }
 
-    function dragMove(event){
+    this.dragMove = function(event){
         if(mousedown == false){
             //do nothing
         }else{
-            rectID = event.target.getAttribute('rect-data');
             dx = event.x - start.x;
             dy = event.y - start.y;
-            rect_translate(rectID, dx,dy);
-            redraw(rectID);  
+            current = this.getPosition();
+            this.setPosition(current.x + dx, current.y + dy);
+            this.redraw();
             start.x = event.x;
-            start.y = event.y;   
+            start.y = event.y;
             
         }
     }
+    
+    this.element.addEventListener('mousedown', startDrag);
+    this.element.addEventListener('touchstart', startDrag);
 
-    for(i=0; i<rectangles.length; i++){
-        rectangles[i].addEventListener('mousedown', startDrag);
-        rectangles[i].addEventListener('touchstart', startDrag);
+    this.element.addEventListener('mouseup', endDrag);
+    this.element.addEventListener('touchend', endDrag);
 
-        rectangles[i].addEventListener('mouseup', endDrag);
-        rectangles[i].addEventListener('touchend', endDrag);
+    this.element.addEventListener('mouseleave',endDrag);
 
-        rectangles[i].addEventListener('mouseleave',endDrag);
+    document.addEventListener('touchmove', this.dragMove.bind(this))
+    document.addEventListener('mousemove', this.dragMove.bind(this))
 
-        document.addEventListener('touchmove', dragMove)
-        document.addEventListener('mousemove', dragMove)
-    }
+} //end of rectangle
 
-}
 
 
 /*

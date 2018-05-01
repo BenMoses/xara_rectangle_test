@@ -7,16 +7,19 @@
 <meta name="author" content="Benjamin Moses">
 <link rel="stylesheet" href="./styles.css"></link>
 <script src="./rectangleInfo.js"></script>
+<script src="./ui.js"></script>
 <script src="./rectangle.js"></script>
+<script src="./app_initialiser.js"></script>
 
 </head>
 
 <body>
     
     <div id="app">
+        <div id="background"></div>
     </div>
     <script>
-        app_init(window.rectanglesData);
+        var application = app_init(window.rectanglesData);
     </script>
     
 </body>

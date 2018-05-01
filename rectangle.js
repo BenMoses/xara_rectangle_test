@@ -25,28 +25,6 @@
 }
 
 */
-window.currentState = {};
-
-function app_init(initialValues){
-
-    var app = document.querySelector('#app');
-
-    for(i=0; i<initialValues.length; i++){
-        var curr = initialValues[i];
-        window.currentState[i] = new rectangle( curr.id,
-                                                curr.x,
-                                                curr.y,
-                                                curr.width,
-                                                curr.height,
-                                                curr.radius);
-    }
-
-
-    this.getRectById = function(Identifier){ //return the object of the rectangle
-        return window.currentState[Identifier];
-    }
-
-} //end of app
 
 function rectangle(id, x = 0, y = 0, width = 100, height = 100, radius = 0){
     this.id = id;
@@ -56,6 +34,7 @@ function rectangle(id, x = 0, y = 0, width = 100, height = 100, radius = 0){
     this.height = height;
     this.radius = radius;
     this.element;
+
 
     this.draw = function(){
         var app = document.querySelector('#app');
@@ -72,36 +51,41 @@ function rectangle(id, x = 0, y = 0, width = 100, height = 100, radius = 0){
         app.appendChild(rect);
         return rect;
     }
-    this.element = this.draw();
 
     this.redraw = function(){
         var rect = document.querySelector(`[rect-data="${this.id}"]`); //get the edited element
-        rect.style.width = window.currentState[this.id].width + "px";
-        rect.style.height = window.currentState[this.id].height + "px";
-        rect.style.left = window.currentState[this.id].x + "px";
-        rect.style.top = window.currentState[this.id].y + "px";
-        rect.style.borderRadius = window.currentState[this.id].radius + "px";
+        rect.style.width = this.width + "px";
+        rect.style.height = this.height + "px";
+        rect.style.left = this.x + "px";
+        rect.style.top = this.y + "px";
+        rect.style.borderRadius = this.radius + "px";
         return true;
     }
+    this.element = this.draw();
+
 
     
     this.toJSON = function(){
         return { id: this.id, width: this.width, height: this.height, x: this.x, y: this.y, radius: this.radius };
     }
 
-    this.setSize = function(width, height){
-        this.width = width;
-        this.height = height;
-        this.redraw();
-    }
 
+//Position:
     this.getPosition = function(){
-        return {x: window.currentState[this.id].x, y: window.currentState[this.id].y};
+        return {x: this.x, y: this.y};
     }
 
     this.setPosition = function(x, y){
-        window.currentState[this.id].x = x;
-        window.currentState[this.id].y = y;
+        this.x = x;
+        this.y = y;
+        this.redraw();
+    }
+
+//Rectangle Attributes:
+
+    this.setSize = function(width, height){
+        this.width = width;
+        this.height = height;
         this.redraw();
     }
 
@@ -110,6 +94,31 @@ function rectangle(id, x = 0, y = 0, width = 100, height = 100, radius = 0){
         this.y = y;
         this.redraw();
     }
+
+
+    this.destroyUI = function(){
+        var handles = document.querySelectorAll('.handle');
+        for(i=0; i<handles.length; i++){
+            handles[i].remove();
+        }
+    }
+
+
+    this.reDrawHandles = function(){
+        this.destroyUI();
+        var app = document.querySelector('#app');
+        var radiusHandle = document.createElement('div');
+        radiusHandle.className = "radius handle";
+        radiusHandle.style.left = this.x + this.width - 5 + "px";
+        radiusHandle.style.top = this.y - 5 + "px";
+        app.appendChild(radiusHandle);
+    }
+
+
+    this.element.addEventListener('click', this.reDrawHandles.bind(this));
+    document.querySelector('#background').addEventListener('click', this.destroyUI);
+
+/*
 
     var mousedown = false;
     var start = {};
@@ -143,24 +152,8 @@ function rectangle(id, x = 0, y = 0, width = 100, height = 100, radius = 0){
     }
     
     this.element.addEventListener('mousedown', startDrag);
-    this.element.addEventListener('touchstart', startDrag);
-
     this.element.addEventListener('mouseup', endDrag);
-    this.element.addEventListener('touchend', endDrag);
-
     this.element.addEventListener('mouseleave',endDrag);
-
-    document.addEventListener('touchmove', this.dragMove.bind(this))
     document.addEventListener('mousemove', this.dragMove.bind(this))
-
-} //end of rectangle
-
-
-
-/*
-var rect = application.getRectById(1); 
-rect.setSize(100, 100); 
-rect.setPosition(10, 10); 
-rect.setCornerRadius(5); 
-expect(rect.toJSON()).eql({ id: 1, width: 100, height: 100, x: 10, y: 10, radius: 5 });
 */
+} //end of rectangle

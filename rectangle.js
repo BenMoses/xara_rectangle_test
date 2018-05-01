@@ -41,12 +41,11 @@ function app_init(initialValues){
                                                 curr.radius);
     }
 
-
-    this.getRectById = function(Identifier){ //return the object of the rectangle
-        return window.currentState[Identifier];
-    }
-
 } //end of app
+
+app_init.getRectById = function(Identifier){ //return the object of the rectangle
+    return window.currentState[Identifier];
+}
 
 function rectangle(id, x = 0, y = 0, width = 100, height = 100, radius = 0){
     this.id = id;
@@ -76,11 +75,11 @@ function rectangle(id, x = 0, y = 0, width = 100, height = 100, radius = 0){
 
     this.redraw = function(){
         var rect = document.querySelector(`[rect-data="${this.id}"]`); //get the edited element
-        rect.style.width = window.currentState[this.id].width + "px";
-        rect.style.height = window.currentState[this.id].height + "px";
-        rect.style.left = window.currentState[this.id].x + "px";
-        rect.style.top = window.currentState[this.id].y + "px";
-        rect.style.borderRadius = window.currentState[this.id].radius + "px";
+        rect.style.width = this.width + "px";
+        rect.style.height = this.height + "px";
+        rect.style.left = this.x + "px";
+        rect.style.top = this.y + "px";
+        rect.style.borderRadius = this.radius + "px";
         return true;
     }
 
@@ -96,12 +95,12 @@ function rectangle(id, x = 0, y = 0, width = 100, height = 100, radius = 0){
     }
 
     this.getPosition = function(){
-        return {x: window.currentState[this.id].x, y: window.currentState[this.id].y};
+        return {x: this.x, y: this.y};
     }
 
     this.setPosition = function(x, y){
-        window.currentState[this.id].x = x;
-        window.currentState[this.id].y = y;
+        this.x = x;
+        this.y = y;
         this.redraw();
     }
 

@@ -14,3 +14,13 @@ body {
 .editable {
     cursor: all-scroll;
 }
+
+.handles {
+    position:absolute;
+    width:16px;
+    height:16px;
+    border-radius:16px;
+    border: solid 4px #4bb1fe;
+    background-color: #8dc4ff;
+    cursor:pointer;
+}

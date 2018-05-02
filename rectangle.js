@@ -72,6 +72,7 @@ function rectangle(id, x = 0, y = 0, width = 100, height = 100, radius = 0){
         return rect;
     }
     this.element = this.draw();
+    this.allHandles = initHandles(this);
 
     this.redraw = function(){
         var rect = document.querySelector(`[rect-data="${this.id}"]`); //get the edited element
@@ -80,6 +81,7 @@ function rectangle(id, x = 0, y = 0, width = 100, height = 100, radius = 0){
         rect.style.left = this.x + "px";
         rect.style.top = this.y + "px";
         rect.style.borderRadius = this.radius + "px";
+        this.allHandles.forEach(handle => handle.updatePosition())
         return true;
     }
 
@@ -117,13 +119,11 @@ function rectangle(id, x = 0, y = 0, width = 100, height = 100, radius = 0){
         mousedown = true;
         start.x = event.x;
         start.y = event.y;         
-        event.target.style.zIndex = 100;
     }
     function endDrag(event){
         mousedown = false;
         start.x = null;
         start.y = null; 
-        event.target.style.zIndex = 0;  
     }
 
     this.dragMove = function(event){
@@ -140,18 +140,11 @@ function rectangle(id, x = 0, y = 0, width = 100, height = 100, radius = 0){
             
         }
     }
-    
+
     this.element.addEventListener('mousedown', startDrag);
-    this.element.addEventListener('touchstart', startDrag);
-
     this.element.addEventListener('mouseup', endDrag);
-    this.element.addEventListener('touchend', endDrag);
-
     this.element.addEventListener('mouseleave',endDrag);
-
-    document.addEventListener('touchmove', this.dragMove.bind(this))
     document.addEventListener('mousemove', this.dragMove.bind(this))
-
 } //end of rectangle
 
 
@@ -163,3 +156,79 @@ rect.setPosition(10, 10);
 rect.setCornerRadius(5); 
 expect(rect.toJSON()).eql({ id: 1, width: 100, height: 100, x: 10, y: 10, radius: 5 });
 */
+
+var defaultHandles = [
+    {
+        id:0,
+        type: "top-resize"
+    }
+]
+
+function initHandles(el){ //initialise the handles
+    var allHandles = [];
+    for(k=0; k<defaultHandles.length; k++){
+        allHandles[k] = new handle(el, defaultHandles[k].id, defaultHandles[k].type)
+    };
+
+    return allHandles;
+}
+
+function updateHandles(el){
+    
+}
+
+
+function handle(parentEl, id, type){
+    this.parentEl = parentEl;
+    
+    this.draw = function(){
+            var app = document.querySelector('#app');
+            var rect = document.createElement('div');
+            rect.setAttribute('handle-for', id);
+            rect.className = `handles`;
+            rect.style.left = `${this.parentEl.x + this.parentEl.width/2 - 12}px`;
+            rect.style.top = `${this.parentEl.y - 12}px`;
+            app.appendChild(rect);
+            return rect;
+    }
+    this.handle = this.draw();
+
+    this.updatePosition = function(){ //doesn't red
+        this.handle.style.left = `${this.parentEl.x + this.parentEl.width/2 - 12}px`;
+        this.handle.style.top = `${this.parentEl.y - 12}px`;
+    }
+
+    var mousedown = false;
+    var start = {};
+
+    function startDrag(event){
+        mousedown = true;
+        start.x = event.x;
+        start.y = event.y;         
+    }
+    function endDrag(event){
+        mousedown = false;
+        start.x = null;
+        start.y = null; 
+    }
+
+    this.dragMove = function(event){
+        if(mousedown == false){
+            //do nothing
+        }else{
+            dx = event.x - start.x;
+            dy = event.y - start.y;
+            current = this.parentEl.getPosition();
+            this.parentEl.setPosition(current.x + dx, current.y + dy);
+            this.parentEl.redraw();
+            start.x = event.x;
+            start.y = event.y;
+            
+        }
+    }
+
+    this.handle.addEventListener('mousedown', startDrag);
+    this.handle.addEventListener('mouseup', endDrag);
+    this.handle.addEventListener('mouseleave',endDrag);
+    document.addEventListener('mousemove', this.dragMove.bind(this))
+}

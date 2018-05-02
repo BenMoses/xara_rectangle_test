@@ -90,6 +90,10 @@ function rectangle(id, x = 0, y = 0, width = 100, height = 100, radius = 0){
         return { id: this.id, width: this.width, height: this.height, x: this.x, y: this.y, radius: this.radius };
     }
 
+    this.getSize = function(){
+        return {height: this.height, width: this.width};
+    }
+
     this.setSize = function(width, height){
         this.width = width;
         this.height = height;
@@ -218,8 +222,10 @@ function handle(parentEl, id, type){
         }else{
             dx = event.x - start.x;
             dy = event.y - start.y;
-            current = this.parentEl.getPosition();
-            this.parentEl.setPosition(current.x + dx, current.y + dy);
+            currSize = this.parentEl.getSize();
+            currPosition = this.parentEl.getPosition();
+            this.parentEl.setPosition(currPosition.x, currPosition.y + dy);
+            this.parentEl.setSize(currSize.width, currSize.height - dy);
             this.parentEl.redraw();
             start.x = event.x;
             start.y = event.y;
